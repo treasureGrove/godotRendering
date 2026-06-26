@@ -380,6 +380,9 @@ RendererCompositorRD::RendererCompositorRD() {
 		scene = memnew(RendererSceneRenderImplementation::RenderForwardMobile());
 	} else if (rendering_method == "forward_plus") {
 		scene = memnew(RendererSceneRenderImplementation::RenderForwardClustered());
+	} else if (rendering_method == "tg_deferred") {
+		WARN_PRINT_ONCE("Rendering method 'tg_deferred' is not yet implemented. Defaulting to Forward+ renderer.");
+		scene = memnew(RendererSceneRenderImplementation::RenderForwardClustered());
 	} else {
 		// Fall back to our high end renderer.
 		ERR_PRINT(vformat("Cannot instantiate RenderingDevice-based renderer with renderer type '%s'. Defaulting to Forward+ renderer.", rendering_method));

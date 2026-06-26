@@ -520,6 +520,13 @@ void ProjectDialog::_renderer_selected() {
 				String::utf8("\n•  ") + TTR("Intended for low-end/older devices.") +
 				String::utf8("\n•  ") + TTR("Uses OpenGL 3 backend (OpenGL 3.3/ES 3.0/WebGL2).") +
 				String::utf8("\n•  ") + TTR("Fastest rendering of simple scenes."));
+	} else if (renderer_type == "tg_deferred") {
+		renderer_info->set_text(
+				String::utf8("•  ") + TTR("Experimental deferred renderer.") +
+				String::utf8("\n•  ") + TTR("Uses RenderingDevice backend.") +
+				String::utf8("\n•  ") + TTR("Currently falls back to Forward+ until implemented.") +
+				String::utf8("\n•  ") + TTR("Windows Vulkan development target."));
+		rd_error = !rendering_device_supported;
 	} else {
 		WARN_PRINT("Unknown renderer type. Please report this as a bug on GitHub.");
 	}
@@ -587,6 +594,8 @@ void ProjectDialog::ok_pressed() {
 			project_features.push_back("GL Compatibility");
 			// Also change the default renderer for the mobile override.
 			initial_settings["rendering/renderer/rendering_method.mobile"] = "gl_compatibility";
+		} else if (renderer_type == "tg_deferred") {
+			project_features.push_back("Forward Plus");
 		} else {
 			WARN_PRINT("Unknown renderer type. Please report this as a bug on GitHub.");
 		}
@@ -1135,6 +1144,21 @@ ProjectDialog::ProjectDialog() {
 	if (default_renderer_type == "forward_plus") {
 		rs_button->set_pressed(true);
 	}
+
+	rs_button = memnew(CheckBox);
+	rs_button->set_button_group(renderer_button_group);
+	rs_button->set_text(TTRC("TG Deferred"));
+	rs_button->set_accessibility_name(TTRC("Renderer:"));
+#ifndef RD_ENABLED
+	rs_button->set_disabled(true);
+#endif
+	rs_button->set_meta(SNAME("rendering_method"), "tg_deferred");
+	rs_button->connect(SceneStringName(pressed), callable_mp(this, &ProjectDialog::_renderer_selected));
+	rvb->add_child(rs_button);
+	if (default_renderer_type == "tg_deferred") {
+		rs_button->set_pressed(true);
+	}
+
 	rs_button = memnew(CheckBox);
 	rs_button->set_button_group(renderer_button_group);
 	rs_button->set_text(TTRC("Mobile"));
